@@ -14,10 +14,11 @@
     "zip:firefox": "pnpm check:locales && wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "lint": "oxlint",
-    "check": "pnpm compile && pnpm lint && pnpm check:locales && pnpm check:i18n",
+    "check": "pnpm compile && pnpm lint && pnpm check:locales && pnpm check:i18n && pnpm check:merge",
     "release": "node scripts/release.mjs",
     "check:locales": "node scripts/check-locales.mjs",
     "check:i18n": "node scripts/check-i18n.mjs",
+    "check:merge": "node scripts/check-merge.mjs",
     "postinstall": "wxt prepare"
   },
   "dependencies": {

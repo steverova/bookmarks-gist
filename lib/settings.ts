@@ -5,9 +5,12 @@
  * a otras máquinas a través de la cuenta del navegador.
  */
 import { storage } from '#imports';
-import { ROOT_KEYS, type RootKey } from './types';
+import { ROOT_KEYS, type RootKey, type SyncNode } from './types';
 
 export type LogLevel = 'info' | 'warn' | 'error';
+
+/** Modo de sincronización elegido (se recuerda entre sesiones). */
+export type SyncMode = 'full' | 'pull' | 'push';
 
 export interface LogEntry {
   at: number;
@@ -20,6 +23,23 @@ export interface SyncOptions {
   roots: RootKey[];
   /** Si es true, calcula lo que haría pero no escribe nada. */
   dryRun: boolean;
+  /** Modo por defecto del botón de sync (popup y panel). */
+  mode: SyncMode;
+}
+
+const DEFAULT_SYNC_OPTIONS: SyncOptions = {
+  roots: ['bar', 'other', 'mobile'],
+  dryRun: false,
+  mode: 'full',
+};
+
+/** Rellena huecos de valores guardados por versiones anteriores. */
+export function withDefaultSyncOptions(options: SyncOptions): SyncOptions {
+  return {
+    roots: options.roots ?? DEFAULT_SYNC_OPTIONS.roots,
+    dryRun: options.dryRun ?? DEFAULT_SYNC_OPTIONS.dryRun,
+    mode: options.mode ?? DEFAULT_SYNC_OPTIONS.mode,
+  };
 }
 
 export interface LastSync {
@@ -32,6 +52,16 @@ export interface LastSync {
   removed: number;
   bookmarks: number;
   folders: number;
+}
+
+/**
+ * Último estado sincronizado que conoce este navegador (la «base» de la fusión
+ * de tres vías). Se guarda junto al id del gist al que pertenece: si el usuario
+ * cambia de gist, la base anterior se descarta para no propagar borrados falsos.
+ */
+export interface SyncSnapshot {
+  gistId: string;
+  nodes: SyncNode[];
 }
 
 export const MAX_LOG_ENTRIES = 200;
@@ -49,6 +79,12 @@ export const lastRevision = storage.defineItem<string>('local:lastRevision', {
   fallback: '',
 });
 
+/** Base de la fusión de tres vías (estado común tras la última sincronización). */
+export const lastSnapshot = storage.defineItem<SyncSnapshot | null>(
+  'local:lastSnapshot',
+  { fallback: null },
+);
+
 export const syncLog = storage.defineItem<LogEntry[]>('local:syncLog', {
   fallback: [],
 });
@@ -58,7 +94,7 @@ export const lastSync = storage.defineItem<LastSync | null>('local:lastSync', {
 });
 
 export const syncOptions = storage.defineItem<SyncOptions>('local:syncOptions', {
-  fallback: { roots: ['bar', 'other', 'mobile'], dryRun: false },
+  fallback: DEFAULT_SYNC_OPTIONS,
 });
 
 /** Idioma de la UI: `auto` (sigue al navegador) o un código de `locales/`. */
@@ -82,6 +118,7 @@ export async function clearCredentials(): Promise<void> {
     githubToken.setValue(''),
     gistId.setValue(''),
     lastRevision.setValue(''),
+    lastSnapshot.setValue(null),
     lastSync.setValue(null),
   ]);
 }

@@ -12,11 +12,21 @@ body {
   padding: 1.5rem 1.25rem 4rem;
 }
 
+/* Popup: se deja la ventana transparente para que se vean las esquinas
+   redondeadas que dibuja el contenedor. */
+:root:has(body.popup-page),
+body.popup-page {
+  background: transparent;
+}
+
 .app--popup {
   width: 330px;
   max-width: 100%;
   padding: 1rem;
   box-sizing: border-box;
+  background: var(--background-body, #fff);
+  border: 1px solid var(--border, #dbdbdb);
+  border-radius: 14px;
 }
 
 .app__title {
@@ -28,6 +38,13 @@ body {
   margin: 0;
   font-size: 0.85rem;
   opacity: 0.7;
+}
+
+.app__version {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  opacity: 0.55;
 }
 
 /* Tabs ------------------------------------------------------------------ */
@@ -97,8 +114,28 @@ body {
   align-items: center;
 }
 
-.actions button {
+.actions button,
+.actions select {
   margin: 0;
+}
+
+/* Selector de modo del popup: cede espacio para convivir con el botón. */
+.app--popup .mode-select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Acción con aspecto de enlace (p. ej. «Abrir panel» en el popup). */
+.link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--links, #2563eb);
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .row {

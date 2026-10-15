@@ -201,6 +201,10 @@ if (DRY_RUN) console.log('Modo dry-run: no se modifica nada.');
 step('Comprobaciones (tipos, lint, traducciones, i18n)');
 run('pnpm check');
 
+// Sin notas en CHANGELOG.md no se publica (el workflow también lo comprueba).
+step('Comprobar las notas del release (CHANGELOG.md)');
+capture(`node scripts/changelog-notes.mjs ${version}`);
+
 if (bumping) {
   step(`Subir la versión en package.json a ${version}`);
   if (!DRY_RUN) {

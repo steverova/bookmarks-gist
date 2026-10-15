@@ -5,26 +5,19 @@ import type { AppState, TestConnectionResult } from '@/lib/messaging';
 import { send } from '@/lib/messaging';
 import * as settings from '@/lib/settings';
 import type { SyncMode, SyncReport } from '@/lib/sync';
-import { useStoredField } from '../hooks';
+import { SYNC_MODE_OPTIONS } from '@/lib/sync-modes';
+import { useStoredField, useSyncOptions } from '../hooks';
 
 interface Props {
   state: AppState | null;
   onChanged: () => void;
 }
 
-const MODES: {
-  id: SyncMode;
-  key: 'main.modeFull' | 'main.modePull' | 'main.modePush';
-}[] = [
-  { id: 'full', key: 'main.modeFull' },
-  { id: 'pull', key: 'main.modePull' },
-  { id: 'push', key: 'main.modePush' },
-];
-
 export function MainTab({ state, onChanged }: Props) {
   const token = useStoredField(settings.githubToken);
   const gist = useStoredField(settings.gistId);
-  const [mode, setMode] = useState<SyncMode>('full');
+  const { options: syncOptions, update: updateSyncOptions } = useSyncOptions();
+  const mode: SyncMode = syncOptions?.mode ?? 'full';
   const [busy, setBusy] = useState(false);
   const [test, setTest] = useState<TestConnectionResult | null>(null);
   const [report, setReport] = useState<SyncReport | null>(null);
@@ -102,9 +95,11 @@ export function MainTab({ state, onChanged }: Props) {
           <select
             id="mode"
             value={mode}
-            onChange={(event) => setMode(event.target.value as SyncMode)}
+            onChange={(event) =>
+              void updateSyncOptions({ mode: event.target.value as SyncMode })
+            }
           >
-            {MODES.map((item) => (
+            {SYNC_MODE_OPTIONS.map((item) => (
               <option key={item.id} value={item.id}>
                 {i18n.t(item.key)}
               </option>

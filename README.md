@@ -50,6 +50,9 @@ nunca se sube a la nube ni al gist.
 | `pull`     | Aplica el gist en este navegador, sin publicar.              |
 | `push`     | Publica el estado local, sin tocar los marcadores locales.   |
 
+El modo se elige en el **popup** (el selector junto a *Sync bookmarks*) o en la
+pestaña **Principal** del panel, y se recuerda entre sesiones.
+
 En **Ajustes** hay un *dry-run* que calcula y registra lo que haría sin escribir
 nada.
 
@@ -84,17 +87,31 @@ El gist contiene `bookmarks-sync.json`:
 
 ## Cómo funciona la fusión
 
-Unión de ambos lados: las carpetas se emparejan por ruta y título, y los
-marcadores por **URL normalizada**. Cuando un nodo existe en los dos lados, gana
-el título del que tenga `dateModified` más reciente. El árbol resultante se
-reconcilia contra el navegador (crear / renombrar / eliminar) dentro de las
-raíces seleccionadas.
+Es una **fusión de tres vías**: además de lo local y lo remoto, se usa como
+*basa* el último estado sincronizado en este navegador (guardado en
+`storage.local:lastSnapshot`, junto al id del gist). Las carpetas se emparejan
+por ruta y título, y los marcadores por **URL normalizada**.
+
+- Un nodo que está en la base y ha desaparecido de un lado se propaga como
+  **borrado** al otro (adiós a la unión eterna: si borras un marcador o una
+  carpeta y pulsas *Sync bookmarks*, desaparece también del gist).
+- Si el otro lado lo había **modificado**, gana la modificación: un borrado
+  nunca pisa un cambio en paralelo.
+- Las altas de los dos lados se unen. Cuando un nodo existe en ambos, gana el
+  título del lado que cambió respecto a la base (o el de `dateModified` más
+  reciente si cambiaron los dos).
+
+El árbol resultante se reconcilia contra el navegador (crear / renombrar /
+eliminar) dentro de las raíces seleccionadas y se publica en el gist. La base se
+actualiza tras cada sincronización con las raíces disponibles en este navegador,
+de modo que una raíz que aquí no existe (p. ej. `menu` en Chromium) nunca se
+interprete como borrada.
 
 ## Limitaciones conocidas (v1)
 
-- La fusión es una **unión**: borrar un marcador no se propaga al otro lado
-  (nunca se pierde nada, pero tampoco se propaga el borrado). Requiere un modo
-  «última escritura gana» con lápidas.
+- Los borrados se propagan por **detección de ausencia respecto a la base**: si
+  borras algo en un navegador *antes* de instalar la extensión (sin base), la
+  primera sync lo une como alta en lugar de propagar el borrado.
 - Mover un marcador de carpeta se resuelve como *crear + eliminar* (el
   marcador pierde su id nativo y `dateAdded`).
 - Firefox `menu________` no se toca en Chromium: se conserva en el gist tal cual
@@ -115,9 +132,9 @@ lib/
   roots.ts             # detección de navegador y mapeo de raíces nativas
   bookmarks/read.ts    # árbol nativo -> documento
   bookmarks/apply.ts   # documento -> árbol nativo
-  merge.ts             # fusión por URL + carpetas por ruta
+  merge.ts             # fusión de tres vías (base/local/remoto) + borrados
   gist.ts              # cliente de la API de Gists
-  settings.ts          # storage tipado
+  settings.ts          # storage tipado (token, gist id y base de la fusión)
   sync.ts              # orquestador
   messaging.ts         # tipos de mensajes
   format.ts            # formateo de fechas/revisiones
@@ -128,6 +145,9 @@ locales/
 assets/app.css         # layout sobre water.css
 scripts/make-icons.mjs # genera public/icon/*.png (sin dependencias)
 scripts/check-locales.mjs # valida que las traducciones no se desincronicen
+scripts/check-merge.mjs   # prueba altas, borrados y conflictos de la fusión
+scripts/changelog-notes.mjs # notas del release desde CHANGELOG.md
+CHANGELOG.md               # cambios por versión (notas del GitHub Release)
 ```
 
 ## Idiomas (i18n)
@@ -193,10 +213,11 @@ de menos o de más respecto a `en`.
 | `pnpm zip:firefox`   | empaqueta el zip de Firefox + sources |
 | `pnpm compile`       | typecheck (`tsc --noEmit`)           |
 | `pnpm lint`          | [oxlint](https://oxc.rs)             |
-| `pnpm check`         | compile + lint + check:locales + check:i18n |
+| `pnpm check`         | compile + lint + check:locales + check:i18n + check:merge |
 | `pnpm release <bump>`| publica una versión: `patch\|minor\|major\|x.y.z\|current` |
 | `pnpm check:locales` | valida la consistencia de traducciones |
 | `pnpm check:i18n`    | ejercita plurales, sustituciones y locales |
+| `pnpm check:merge`   | prueba altas, borrados y conflictos de la fusión |
 | `node scripts/make-icons.mjs` | regenera los iconos        |
 
 ## Publicación
@@ -261,13 +282,15 @@ El script hace, en orden:
 1. Valida que la versión sea un `patch|minor|major` o un `x.y.z` **mayor** que la actual.
 2. Exige el **árbol limpio** (todo commiteado) y que el tag no exista todavía.
 3. Corre `pnpm check`.
-4. Sube `version` en `package.json`.
-5. Con `--local`, ejecuta `pnpm zip` y `pnpm zip:firefox` y comprueba que los
+4. Comprueba que `CHANGELOG.md` tiene la sección de esa versión (si no, **falla**):
+   es la que se usa como notas del release.
+5. Sube `version` en `package.json`.
+6. Con `--local`, ejecuta `pnpm zip` y `pnpm zip:firefox` y comprueba que los
    tres artefactos existen con la versión nueva.
-6. Verifica que el release solo cambia `package.json` (si `pnpm check` o el
+7. Verifica que el release solo cambia `package.json` (si `pnpm check` o el
    empaquetado han tocado algún fichero rastreado, **revierte el bump y falla**).
-7. `git add package.json`, commit `chore: release vX` y tag anotado `vX`.
-8. `git push` de la rama y del tag → dispara el workflow. Con `--no-push` te
+8. `git add package.json`, commit `chore: release vX` y tag anotado `vX`.
+9. `git push` de la rama y del tag → dispara el workflow. Con `--no-push` te
    imprime los comandos y para.
 
 Opciones: `--local`, `--no-push`, `--dry-run`.
@@ -293,7 +316,9 @@ gh release create v0.2.0 .output/*.zip --generate-notes
    así no se publica un `v0.2.0` con un zip `0.1.0`).
 2. Corre `pnpm check`.
 3. Empaqueta Chrome y Firefox.
-4. Adjunta los tres zips al GitHub Release.
+4. Saca las notas del release de la sección de esa versión en `CHANGELOG.md`
+   (`scripts/changelog-notes.mjs`); si no existe, **falla**.
+5. Adjunta los tres zips al GitHub Release, con esas notas.
 
 Con `workflow_dispatch` (ejecución manual) los zips quedan como artefactos del
 run, sin crear release.

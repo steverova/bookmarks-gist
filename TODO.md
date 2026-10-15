@@ -110,7 +110,8 @@ Estilos con **water.css**. UI en React. Build con **WXT**.
 ## Pendiente / futuro
 
 - [ ] Sincronizar la raíz `menu________` de Firefox en Chromium (v1 la conserva pero no la replica)
-- [ ] Modo «última escritura gana» con lápidas para propagar borrados
+- [x] Propagar borrados con **fusión de tres vías** (base/local/remoto); base en `storage.local:lastSnapshot`
+- [x] `scripts/check-merge.mjs` (`pnpm check:merge`) cubre altas, borrados, conflictos e idempotencia
 - [ ] Movimientos sin perder `dateAdded` (usar `bookmarks.move` en vez de crear+borrar)
 - [ ] Sync automático por `browser.alarms`
 - [ ] Resolución de conflictos interactiva / vista diff

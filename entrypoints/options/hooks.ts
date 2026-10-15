@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AUTO_LOCALE, resolveLocale, setLocale } from '@/lib/i18n';
 import { send, type AppState } from '@/lib/messaging';
 import * as settings from '@/lib/settings';
-import type { SyncOptions } from '@/lib/settings';
+
+export { useSyncOptions } from '@/lib/use-sync-options';
 
 interface StoredItem {
   getValue(): Promise<string>;
@@ -69,24 +70,6 @@ export function useStoredField(item: StoredItem, delay = 400) {
   }, [saved]);
 
   return { value, setValue, ready, saved };
-}
-
-/** Opciones de sincronización persistidas. */
-export function useSyncOptions() {
-  const [options, setOptions] = useState<SyncOptions | null>(null);
-
-  useEffect(() => {
-    void settings.syncOptions.getValue().then(setOptions);
-  }, []);
-
-  const update = useCallback(async (patch: Partial<SyncOptions>) => {
-    const current = await settings.syncOptions.getValue();
-    const next = { ...current, ...patch };
-    await settings.syncOptions.setValue(next);
-    setOptions(next);
-  }, []);
-
-  return { options, update };
 }
 
 /** Preferencia de idioma (`auto` o un código) con aplicación inmediata. */

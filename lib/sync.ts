@@ -4,10 +4,10 @@ import { applyTree, type ApplyStats } from './bookmarks/apply';
 import { readNativeTree } from './bookmarks/read';
 import * as gist from './gist';
 import { randomId } from './ids';
-import { mergeTrees } from './merge';
+import { mergeThreeWay } from './merge';
 import { clientLabel } from './roots';
 import * as settings from './settings';
-import type { LogLevel } from './settings';
+import type { LogLevel, SyncMode } from './settings';
 import {
   countBookmarks,
   countFolders,
@@ -18,7 +18,7 @@ import {
   type SyncNode,
 } from './types';
 
-export type SyncMode = 'full' | 'pull' | 'push';
+export type { SyncMode };
 
 export class SyncError extends Error {
   constructor(message: string) {
@@ -90,6 +90,7 @@ export async function runSync(mode: SyncMode = 'full'): Promise<SyncReport> {
 
   let currentGistId = (await settings.gistId.getValue()).trim();
   const storedRevision = await settings.lastRevision.getValue();
+  const storedSnapshot = await settings.lastSnapshot.getValue();
   const managedIds = new Set(options.roots.map((root) => ROOT_IDS[root]));
 
   // --- 1. Leer el gist -----------------------------------------------------
@@ -131,15 +132,28 @@ export async function runSync(mode: SyncMode = 'full'): Promise<SyncReport> {
     ? remoteDoc.nodes.filter((node) => !managedIds.has(node.id))
     : [];
 
+  // Base de la fusión: el último estado sincronizado en este navegador. Sólo
+  // vale si pertenece al gist actual; tras cambiar de gist se empieza de cero.
+  const baseManaged =
+    storedSnapshot && storedSnapshot.gistId === currentGistId
+      ? filterByRoots(storedSnapshot.nodes, options.roots)
+      : [];
+
   let target: SyncNode[];
+  let propagated = 0;
   if (mode === 'pull') {
     target = remoteManaged;
   } else if (mode === 'push' || !remoteDoc) {
     target = localManaged;
   } else {
-    target = mergeTrees(localManaged, remoteManaged);
+    const merged = mergeThreeWay(baseManaged, localManaged, remoteManaged);
+    target = merged.nodes;
+    propagated = merged.deleted;
   }
   add('info', i18n.t('sync.target', [String(countBookmarks(target))]));
+  if (propagated > 0) {
+    add('info', i18n.t('sync.deleted', [String(propagated)]));
+  }
 
   // --- 3. Aplicar en local ------------------------------------------------
   let applied: ApplyStats = EMPTY_STATS;
@@ -165,15 +179,10 @@ export async function runSync(mode: SyncMode = 'full'): Promise<SyncReport> {
   }
 
   // --- 4. Publicar --------------------------------------------------------
-  const finalLocal = options.dryRun
-    ? target
-    : filterByRoots(await readNativeTree(), options.roots);
-  // En `push`/`full` se vuelve a leer el navegador para publicar el estado
-  // real; `preserved` mantiene las raíces que este perfil no gestiona.
-  const uploadNodes =
-    mode === 'pull' || options.dryRun
-      ? [...target, ...preserved]
-      : [...mergeTrees(finalLocal, target), ...preserved];
+  // `target` ya es el estado acordado (con los borrados propagados). Se publica
+  // tal cual para que el gist refleje también las eliminaciones; `preserved`
+  // mantiene intactas las raíces que este perfil no gestiona.
+  const uploadNodes = [...target, ...preserved];
 
   const document: SyncDocument = {
     uniqueId: remoteDoc?.uniqueId ?? randomId(),
@@ -206,6 +215,17 @@ export async function runSync(mode: SyncMode = 'full'): Promise<SyncReport> {
     add('info', i18n.t('sync.dryRun'));
   } else {
     add('info', i18n.t('sync.pullOnly'));
+  }
+
+  // Guardar la base de la próxima fusión. Sólo se incluyen las raíces
+  // disponibles en este navegador: así una raíz que aquí no se puede aplicar
+  // (p. ej. `menu` en Chromium) no parece «borrada» en la siguiente sync.
+  if (!options.dryRun) {
+    const availableRootIds = new Set(localFull.map((node) => node.id));
+    await settings.lastSnapshot.setValue({
+      gistId: finalGistId,
+      nodes: target.filter((node) => availableRootIds.has(node.id)),
+    });
   }
 
   // --- 5. Reportar --------------------------------------------------------
