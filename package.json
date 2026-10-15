@@ -1,0 +1,37 @@
+{
+  "name": "bookmarks-gist",
+  "description": "Sincroniza tus marcadores entre navegadores usando un GitHub Gist.",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.9.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "pnpm check:locales && wxt build",
+    "build:firefox": "pnpm check:locales && wxt build -b firefox",
+    "zip": "pnpm check:locales && wxt zip",
+    "zip:firefox": "pnpm check:locales && wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "lint": "oxlint",
+    "check": "pnpm compile && pnpm lint && pnpm check:locales && pnpm check:i18n",
+    "release": "node scripts/release.mjs",
+    "check:locales": "node scripts/check-locales.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "water.css": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@wxt-dev/i18n": "^0.2.8",
+    "@wxt-dev/module-react": "^1.2.2",
+    "oxlint": "^1.81.0",
+    "typescript": "^5.9.3",
+    "wxt": "^0.21.4"
+  }
+}

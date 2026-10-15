@@ -1,0 +1,227 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.app--popup {
+  width: 330px;
+  max-width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.app__title {
+  margin: 0 0 0.15rem;
+  font-size: 1.35rem;
+}
+
+.app__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* Tabs ------------------------------------------------------------------ */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  margin: 1.25rem 0 1.5rem;
+}
+
+.tab {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.tab:hover {
+  opacity: 1;
+  background: none;
+}
+
+.tab[aria-selected='true'] {
+  border-bottom-color: var(--links, #2563eb);
+  opacity: 1;
+  font-weight: 600;
+}
+
+/* Bloques --------------------------------------------------------------- */
+.card {
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.field > label {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.field small {
+  opacity: 0.7;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.actions button {
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+}
+
+.checkbox input {
+  margin-top: 0.25rem;
+}
+
+.roots {
+  display: grid;
+  gap: 0.4rem;
+}
+
+/* Estado ---------------------------------------------------------------- */
+.status {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.status--ok {
+  color: #15803d;
+}
+
+.status--warn {
+  color: #b45309;
+}
+
+.status--error {
+  color: #b91c1c;
+}
+
+.hint {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+/* Métricas -------------------------------------------------------------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.stat {
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+}
+
+.stat b {
+  display: block;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.stat span {
+  font-size: 0.72rem;
+  opacity: 0.72;
+}
+
+/* Log ------------------------------------------------------------------- */
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 24rem;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.log li {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.3rem 0.45rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.log li:last-child {
+  border-bottom: none;
+}
+
+.log__time {
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.log__level {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  min-width: 3.2rem;
+}
+
+.log__level--info {
+  color: #2563eb;
+}
+
+.log__level--warn {
+  color: #b45309;
+}
+
+.log__level--error {
+  color: #b91c1c;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+.empty {
+  opacity: 0.65;
+  font-size: 0.85rem;
+}

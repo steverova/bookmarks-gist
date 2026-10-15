@@ -1,0 +1,162 @@
+{
+  "extName": "Bookmarks Gist Sync",
+  "extDescription": "Sync your bookmarks between browsers using a GitHub Gist.",
+  "optionsTitle": "Bookmarks Gist Sync — Panel",
+  "common": {
+    "saved": "Saved ✓",
+    "loading": "Loading…",
+    "na": "n/a",
+    "syncing": "Syncing…"
+  },
+  "header": {
+    "hasToken": "token set",
+    "noToken": "no token"
+  },
+  "tabs": {
+    "main": "Main",
+    "settings": "Settings",
+    "log": "Log",
+    "about": "About"
+  },
+  "roots": {
+    "bar": "Bookmarks bar",
+    "other": "Other bookmarks",
+    "mobile": "Mobile bookmarks",
+    "menu": "Bookmarks menu (Firefox only)"
+  },
+  "time": {
+    "never": "never",
+    "seconds": "a few seconds ago",
+    "minutes": {
+      "1": "1 min ago",
+      "n": "$1 min ago"
+    },
+    "hours": {
+      "1": "1 h ago",
+      "n": "$1 h ago"
+    },
+    "days": {
+      "1": "1 d ago",
+      "n": "$1 d ago"
+    }
+  },
+  "popup": {
+    "gist": "Gist $1",
+    "lastSync": "Last sync: $1",
+    "willCreateGist": "A new gist will be created on the first sync.",
+    "missingToken": "Missing token: open the panel to set it.",
+    "sync": "Sync bookmarks",
+    "panel": "Panel",
+    "result": "+$1 · $2 updated · -$3"
+  },
+  "main": {
+    "tokenLabel": "GitHub token",
+    "tokenPlaceholder": "ghp_… or github_pat_…",
+    "tokenHelp": "Needs the gist scope. Stored only in this browser (storage.local), never in the cloud.",
+    "gistIdLabel": "Gist ID",
+    "gistPlaceholder": "leave empty to create a new one",
+    "gistHelp": "The identifier at the end of the gist URL (gist.github.com/user/this-part). Empty = a new gist is created on the first sync.",
+    "modeLabel": "Mode",
+    "modeFull": "Full — download, merge, apply and upload",
+    "modePull": "Download — only apply the gist in this browser",
+    "modePush": "Upload — only publish the local state",
+    "sync": "Sync bookmarks",
+    "test": "Test connection",
+    "lastSyncTitle": "Last sync",
+    "resultTitle": "Result",
+    "never": "Nothing has been synced yet.",
+    "summary": "$1 · $2 · mode $3 · revision $4",
+    "skippedRoots": "Roots not available here: $1",
+    "gistLink": "Gist:"
+  },
+  "stats": {
+    "bookmarks": "bookmarks",
+    "folders": "folders",
+    "created": "created",
+    "updated": "updated",
+    "removed": "deleted",
+    "local": "local",
+    "remote": "remote",
+    "result": "result"
+  },
+  "settings": {
+    "rootsTitle": "Roots to sync",
+    "rootsHelp": "Only roots available in $1 are listed. Other roots present in the gist are preserved untouched.",
+    "languageTitle": "Language",
+    "languageHelp": "By default the browser language is used ($1).",
+    "languageAuto": "Automatic (browser language)",
+    "languageNote": "The extension name and description shown by the browser always follow the browser language.",
+    "behaviorTitle": "Behavior",
+    "dryRun": "Dry run",
+    "dryRunHelp": "Computes and logs what it would do, but changes neither bookmarks nor the gist.",
+    "credentialsTitle": "Credentials",
+    "credentialsHelp": "Deletes the token and gist id stored in this browser. The gist on GitHub is not touched.",
+    "deleteCredentials": "Delete credentials",
+    "confirmDelete": "Confirm deletion",
+    "cancel": "Cancel"
+  },
+  "logTab": {
+    "title": "Log",
+    "refresh": "Refresh",
+    "clear": "Clear",
+    "empty": "No entries yet.",
+    "lastSyncAt": "Last sync: $1"
+  },
+  "about": {
+    "howTitle": "How it works",
+    "step1": "Bookmarks are read from this browser and normalized.",
+    "step2": "The gist JSON is downloaded and merged by URL, keeping the folder path.",
+    "step3": "The result is applied in the browser (create, rename, delete) inside the managed roots.",
+    "step4": "The merged document is published back to the gist.",
+    "union": "Merging is a union: a bookmark present on only one side is never deleted. Propagating deletions needs a last-write-wins mode that will come later.",
+    "detailsTitle": "Details",
+    "format": "Document format: v$1",
+    "browser": "Browser: $1 ($2)",
+    "file": "File in the gist: $1",
+    "revision": "Known revision: $1",
+    "linksTitle": "Links",
+    "gistsApi": "GitHub Gists API",
+    "bookmarksApi": "Bookmarks API (WebExtensions)"
+  },
+  "status": {
+    "connected": "Connected as $1",
+    "connectedNoScope": "Connected as $1, but the token lacks the \"gist\" scope"
+  },
+  "sync": {
+    "client": "Client: $1",
+    "mode": "Mode: $1$2",
+    "dryRunSuffix": " (dry-run)",
+    "roots": "Managed roots: $1",
+    "noRoots": "(none)",
+    "local": "Local: $1 bookmarks, $2 folders",
+    "remote": "Remote: $1 bookmarks (revision $2)",
+    "gistChanged": "The gist changed since the last sync; it will be merged anyway.",
+    "gistMissing": "The configured gist does not exist; a new one will be created.",
+    "target": "Target: $1 bookmarks",
+    "applied": "Applied: +$1 created, $2 updated, -$3 deleted",
+    "skippedRoots": "Roots not available in this browser: $1",
+    "gistCreated": "Gist created: $1",
+    "gistUpdated": "Gist updated (revision $1)",
+    "dryRun": "Dry run: nothing was written to the browser or to the gist.",
+    "pullOnly": "Download mode: nothing was published to the gist."
+  },
+  "error": {
+    "missingToken": "Set the GitHub token first.",
+    "unsupportedMessage": "Unsupported message"
+  },
+  "gist": {
+    "network": "Could not reach GitHub: $1",
+    "invalidFile": "The gist file $1 does not contain valid JSON",
+    "auth": "Invalid or expired token",
+    "forbidden": "The token lacks permission (needs the \"gist\" scope)",
+    "notFound": "Gist not found",
+    "conflict": "Conflict",
+    "unknown": "GitHub error"
+  },
+  "@@extension_id": "<browser.runtime.id>",
+  "@@ui_locale": "<browser.i18n.getUiLocale()>",
+  "@@bidi_dir": "<ltr|rtl>",
+  "@@bidi_reversed_dir": "<rtl|ltr>",
+  "@@bidi_start_edge": "<left|right>",
+  "@@bidi_end_edge": "<right|left>"
+}

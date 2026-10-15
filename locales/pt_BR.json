@@ -1,0 +1,162 @@
+{
+  "extName": "Bookmarks Gist Sync",
+  "extDescription": "Sincronize seus favoritos entre navegadores usando um Gist do GitHub.",
+  "optionsTitle": "Bookmarks Gist Sync — Painel",
+  "common": {
+    "saved": "Salvo ✓",
+    "loading": "Carregando…",
+    "na": "n/d",
+    "syncing": "Sincronizando…"
+  },
+  "header": {
+    "hasToken": "token configurado",
+    "noToken": "sem token"
+  },
+  "tabs": {
+    "main": "Principal",
+    "settings": "Configurações",
+    "log": "Registro",
+    "about": "Sobre"
+  },
+  "roots": {
+    "bar": "Barra de favoritos",
+    "other": "Outros favoritos",
+    "mobile": "Favoritos móveis",
+    "menu": "Menu de favoritos (somente Firefox)"
+  },
+  "time": {
+    "never": "nunca",
+    "seconds": "há alguns segundos",
+    "minutes": {
+      "1": "há 1 min",
+      "n": "há $1 min"
+    },
+    "hours": {
+      "1": "há 1 h",
+      "n": "há $1 h"
+    },
+    "days": {
+      "1": "há 1 d",
+      "n": "há $1 d"
+    }
+  },
+  "popup": {
+    "gist": "Gist $1",
+    "lastSync": "Última sincronização: $1",
+    "willCreateGist": "Um novo gist será criado na primeira sincronização.",
+    "missingToken": "Falta o token: abra o painel para configurá-lo.",
+    "sync": "Sync bookmarks",
+    "panel": "Painel",
+    "result": "+$1 · $2 atualiz. · -$3"
+  },
+  "main": {
+    "tokenLabel": "Token do GitHub",
+    "tokenPlaceholder": "ghp_… ou github_pat_…",
+    "tokenHelp": "Requer o escopo gist. É salvo apenas neste navegador (storage.local), nunca na nuvem.",
+    "gistIdLabel": "ID do gist",
+    "gistPlaceholder": "deixe vazio para criar um novo",
+    "gistHelp": "O identificador no final da URL do gist (gist.github.com/usuario/esta-parte). Vazio = um novo gist é criado na primeira sincronização.",
+    "modeLabel": "Modo",
+    "modeFull": "Completa — baixa, mescla, aplica e envia",
+    "modePull": "Baixar — apenas aplica o gist neste navegador",
+    "modePush": "Enviar — apenas publica o estado local",
+    "sync": "Sync bookmarks",
+    "test": "Testar conexão",
+    "lastSyncTitle": "Última sincronização",
+    "resultTitle": "Resultado",
+    "never": "Nada foi sincronizado ainda.",
+    "summary": "$1 · $2 · modo $3 · revisão $4",
+    "skippedRoots": "Raízes indisponíveis aqui: $1",
+    "gistLink": "Gist:"
+  },
+  "stats": {
+    "bookmarks": "favoritos",
+    "folders": "pastas",
+    "created": "criados",
+    "updated": "atualizados",
+    "removed": "excluídos",
+    "local": "local",
+    "remote": "remoto",
+    "result": "resultado"
+  },
+  "settings": {
+    "rootsTitle": "Raízes a sincronizar",
+    "rootsHelp": "Apenas as raízes disponíveis em $1 são listadas. Outras raízes presentes no gist são preservadas intactas.",
+    "languageTitle": "Idioma",
+    "languageHelp": "Por padrão é usado o idioma do navegador ($1).",
+    "languageAuto": "Automático (idioma do navegador)",
+    "languageNote": "O nome e a descrição da extensão exibidos pelo navegador sempre seguem o idioma do navegador.",
+    "behaviorTitle": "Comportamento",
+    "dryRun": "Modo simulação (dry-run)",
+    "dryRunHelp": "Calcula e registra o que faria, mas não altera os favoritos nem o gist.",
+    "credentialsTitle": "Credenciais",
+    "credentialsHelp": "Apaga o token e o id do gist salvos neste navegador. O gist no GitHub não é alterado.",
+    "deleteCredentials": "Apagar credenciais",
+    "confirmDelete": "Confirmar exclusão",
+    "cancel": "Cancelar"
+  },
+  "logTab": {
+    "title": "Registro",
+    "refresh": "Atualizar",
+    "clear": "Limpar",
+    "empty": "Nenhuma entrada ainda.",
+    "lastSyncAt": "Última sincronização: $1"
+  },
+  "about": {
+    "howTitle": "Como funciona",
+    "step1": "Os favoritos são lidos deste navegador e normalizados.",
+    "step2": "O JSON do gist é baixado e mesclado por URL, mantendo o caminho das pastas.",
+    "step3": "O resultado é aplicado no navegador (criar, renomear, excluir) dentro das raízes gerenciadas.",
+    "step4": "O documento mesclado é publicado de volta no gist.",
+    "union": "A mesclagem é uma união: um favorito presente apenas em um lado nunca é excluído. Propagar exclusões exige um modo de última gravação vence que virá depois.",
+    "detailsTitle": "Detalhes",
+    "format": "Formato do documento: v$1",
+    "browser": "Navegador: $1 ($2)",
+    "file": "Arquivo no gist: $1",
+    "revision": "Revisão conhecida: $1",
+    "linksTitle": "Links",
+    "gistsApi": "API de Gists do GitHub",
+    "bookmarksApi": "API de favoritos (WebExtensions)"
+  },
+  "status": {
+    "connected": "Conectado como $1",
+    "connectedNoScope": "Conectado como $1, mas o token não tem o escopo \"gist\""
+  },
+  "sync": {
+    "client": "Cliente: $1",
+    "mode": "Modo: $1$2",
+    "dryRunSuffix": " (dry-run)",
+    "roots": "Raízes gerenciadas: $1",
+    "noRoots": "(nenhuma)",
+    "local": "Local: $1 favoritos, $2 pastas",
+    "remote": "Remoto: $1 favoritos (revisão $2)",
+    "gistChanged": "O gist mudou desde a última sincronização; será mesclado mesmo assim.",
+    "gistMissing": "O gist configurado não existe; um novo será criado.",
+    "target": "Objetivo: $1 favoritos",
+    "applied": "Aplicado: +$1 criados, $2 atualizados, -$3 excluídos",
+    "skippedRoots": "Raízes indisponíveis neste navegador: $1",
+    "gistCreated": "Gist criado: $1",
+    "gistUpdated": "Gist atualizado (revisão $1)",
+    "dryRun": "Dry-run: nada foi gravado no navegador nem no gist.",
+    "pullOnly": "Modo baixar: nada foi publicado no gist."
+  },
+  "error": {
+    "missingToken": "Configure primeiro o token do GitHub.",
+    "unsupportedMessage": "Mensagem não suportada"
+  },
+  "gist": {
+    "network": "Não foi possível contatar o GitHub: $1",
+    "invalidFile": "O arquivo $1 do gist não contém JSON válido",
+    "auth": "Token inválido ou expirado",
+    "forbidden": "O token não tem permissão (requer o escopo \"gist\")",
+    "notFound": "Gist não encontrado",
+    "conflict": "Conflito",
+    "unknown": "Erro do GitHub"
+  },
+  "@@extension_id": "<browser.runtime.id>",
+  "@@ui_locale": "<browser.i18n.getUiLocale()>",
+  "@@bidi_dir": "<ltr|rtl>",
+  "@@bidi_reversed_dir": "<rtl|ltr>",
+  "@@bidi_start_edge": "<left|right>",
+  "@@bidi_end_edge": "<right|left>"
+}

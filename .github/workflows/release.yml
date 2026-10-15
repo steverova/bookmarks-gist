@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      # El tag y el zip quedan atados por el `version` de package.json: si no
+      # coinciden, fallar aquí evita publicar el zip equivocado.
+      - name: Comprobar que el tag coincide con package.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::El tag $GITHUB_REF_NAME no coincide con package.json ($version)"
+            exit 1
+          fi
+          echo "Tag y versión coinciden: $version"
+
+      - name: Comprobaciones (tipos, lint, traducciones, i18n)
+        run: pnpm check
+
+      - name: Empaquetar
+        run: |
+          pnpm zip
+          pnpm zip:firefox
+
+      - name: Adjuntar los zips al release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            .output/*-chrome.zip
+            .output/*-firefox.zip
+            .output/*-sources.zip
+          generate_release_notes: true
+
+      - name: Subir los zips como artefactos (ejecución manual)
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-zips
+          path: .output/*.zip
+
+      # Envío automático a las tiendas (opcional). Requiere configurar los
+      # secretos en el repo; ver README → «Publicación».
+      #
+      # - name: Enviar a las tiendas
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   run: |
+      #     pnpm wxt submit \
+      #       --chrome-zip .output/*-chrome.zip \
+      #       --firefox-zip .output/*-firefox.zip \
+      #       --firefox-sources-zip .output/*-sources.zip
+      #   env:
+      #     CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      #     CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      #     CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      #     CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+      #     FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+      #     FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+      #     FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
