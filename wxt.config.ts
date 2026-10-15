@@ -8,7 +8,7 @@ import { defineConfig } from 'wxt';
  * un identificador propio (un email o un dominio que controles) antes de la
  * primera publicación. Ver README → «Publicación».
  */
-const GECKO_ID = 'bookmarks-gist@steverova0594.github.io';
+const GECKO_ID = 'bookmarks-gist@steverova.github.io';
 
 // https://wxt.dev/api/config.html
 export default defineConfig({

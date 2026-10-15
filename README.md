@@ -227,6 +227,7 @@ desincronizadas no se genera.
 Con `scripts/release.mjs`:
 
 ```bash
+pnpm release                 # menú interactivo: elige patch/minor/major/current
 pnpm release patch           # 0.1.0 -> 0.1.1
 pnpm release minor           # 0.1.0 -> 0.2.0
 pnpm release 0.2.0           # versión explícita
@@ -234,6 +235,22 @@ pnpm release current         # etiqueta la versión que ya hay (sin bump)
 pnpm release current --local # además empaqueta y verifica los zips aquí
 pnpm release 0.2.0 --dry-run # muestra lo que haría, sin tocar nada
 ```
+
+Sin argumentos abre un menú:
+
+```
+Versión actual: 0.1.0
+
+  ¿Qué publicas?
+    1) patch    → 0.1.1
+    2) minor    → 0.2.0
+    3) major    → 1.0.0
+    4) current  → 0.1.0 sin bump, etiqueta este commit
+    (o escribe una versión, p. ej. 0.3.0)
+```
+
+En un entorno **no interactivo** (CI, `stdin` redirigido) hay que pasar la versión
+como argumento: sin ella el script falla con la ayuda.
 
 Usa `current` para la **primera release** (etiquetar `v0.1.0` sin subir la versión)
 o cuando ya hayas cambiado `version` a mano: etiqueta el commit actual sin crear
@@ -289,9 +306,10 @@ dashboard. Necesita secretos en el repo; genera el `.env.submit` con
 ### Antes de la primera publicación
 
 - [ ] **`gecko.id` en `wxt.config.ts`**: está puesto como
-      `bookmarks-gist@steverova0594.github.io`. El id es **permanente** en AMO —
-      cambiarlo después significa publicar como otra extensión y perder usuarios
-      y actualizaciones. Ponlo a un email o dominio que controles.
+      `bookmarks-gist@steverova.github.io` (derivado de tu usuario de GitHub). El
+      id es **permanente** en AMO — cambiarlo después significa publicar como otra
+      extensión y perder usuarios y actualizaciones. Confírmalo o ponlo a un email
+      o dominio que controles.
 - [ ] `data_collection_permissions` ya está declarado como
       `required: ["browsingActivity"]`, porque la extensión envía a GitHub las
       URLs y títulos de los marcadores (a la cuenta del propio usuario). Si

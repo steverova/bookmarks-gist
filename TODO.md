@@ -96,6 +96,8 @@ Estilos con **water.css**. UI en React. Build con **WXT**.
 - [x] `pnpm release <bump>` (`scripts/release.mjs`): valida versión, exige árbol limpio,
       corre `pnpm check`, hace bump, `--local` para zips, comitea, etiqueta y empuja
       (`--no-push`, `--dry-run`)
+- [x] Sin argumentos abre un **menú interactivo**; con `stdin` no interactivo exige
+      la versión como argumento
 - [x] `pnpm release current` para etiquetar sin bump (primera release)
 - [x] Salvaguarda: el commit del release debe contener **solo** `package.json`
       (si no, revierte el bump y falla)

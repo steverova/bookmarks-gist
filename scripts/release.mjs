@@ -4,11 +4,12 @@
  * empuja. El push del tag dispara `.github/workflows/release.yml`, que empaqueta
  * los zips y los adjunta al GitHub Release.
  *
+ *   pnpm release                # pregunta qué versión publicar
  *   pnpm release patch          # 0.1.0 -> 0.1.1
  *   pnpm release minor          # 0.1.0 -> 0.2.0
  *   pnpm release 0.2.0          # versión explícita
- *   pnpm release current        # etiqueta la versión que ya hay en package.json
- *   pnpm release 0.2.0 --local  # además empaqueta los zips aquí
+ *   pnpm release current        # etiqueta la versión que ya hay, sin bump
+ *   pnpm release current --local  # además empaqueta los zips aquí
  *
  * Flags:
  *   --local     empaqueta y verifica los zips localmente (pnpm zip*)
@@ -17,6 +18,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { createInterface } from 'node:readline/promises';
 
 const args = process.argv.slice(2);
 const flags = new Set(args.filter((arg) => arg.startsWith('--')));
@@ -26,13 +28,16 @@ const DRY_RUN = flags.has('--dry-run');
 const LOCAL = flags.has('--local');
 const NO_PUSH = flags.has('--no-push');
 
-const USAGE = `
-Uso: pnpm release <patch|minor|major|x.y.z|current> [--local] [--no-push] [--dry-run]
+const BUMPS = ['patch', 'minor', 'major', 'current'];
 
-  current     etiqueta la versión que ya está en package.json (sin bump)
-  --local     empaqueta y verifica los zips localmente
-  --no-push   no hace push (no dispara el workflow)
-  --dry-run   muestra lo que haría sin modificar nada
+const USAGE = `
+Uso: pnpm release [patch|minor|major|x.y.z|current] [--local] [--no-push] [--dry-run]
+
+  (sin versión)  pregunta interactivamente qué publicar
+  current        etiqueta la versión que ya está en package.json (sin bump)
+  --local        empaqueta y verifica los zips localmente
+  --no-push      no hace push (no dispara el workflow)
+  --dry-run      muestra lo que haría sin modificar nada
 `;
 
 function fail(message) {
@@ -61,15 +66,6 @@ function run(command) {
   if (result.status !== 0) fail(`Falló: ${command}`);
 }
 
-// --- Calcular la versión nueva ---------------------------------------------
-
-const bump = positional[0];
-if (!bump) fail(`Falta la versión.${USAGE}`);
-if (positional.length > 1) fail(`Sobra un argumento: ${positional[1]}`);
-
-const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-const current = pkg.version;
-
 function compare(a, b) {
   const left = a.split('.').map(Number);
   const right = b.split('.').map(Number);
@@ -79,26 +75,90 @@ function compare(a, b) {
   return 0;
 }
 
+function isValidVersion(value) {
+  return /^\d+\.\d+\.\d+$/.test(value);
+}
+
 function nextVersion(input, from) {
   if (input === 'current') return from;
 
-  if (input !== 'patch' && input !== 'minor' && input !== 'major') {
-    if (!/^\d+\.\d+\.\d+$/.test(input)) {
-      fail(`Versión no válida: «${input}». Usa patch|minor|major|current o x.y.z`);
-    }
-    return input;
+  if (!BUMPS.includes(input) && !isValidVersion(input)) {
+    fail(`Versión no válida: «${input}». Usa patch|minor|major|current o x.y.z`);
   }
+  if (isValidVersion(input)) return input;
 
-  const match = from.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  if (!match) {
+  if (!isValidVersion(from)) {
     fail(`La versión actual (${from}) no es x.y.z; indica una versión explícita.`);
   }
-  const [, major, minor, patch] = match.map(Number);
+  const [, major, minor, patch] = from.match(/^(\d+)\.(\d+)\.(\d+)$/).map(Number);
   if (input === 'major') return `${major + 1}.0.0`;
   if (input === 'minor') return `${major}.${minor + 1}.0`;
   return `${major}.${minor}.${patch + 1}`;
 }
 
+/** Menú interactivo para cuando no se pasa la versión como argumento. */
+async function promptForVersion(from) {
+  if (!process.stdin.isTTY) {
+    fail(`Falta la versión.${USAGE}`);
+  }
+
+  const bumpable = isValidVersion(from);
+  const options = [];
+  if (bumpable) {
+    options.push(['1', 'patch', nextVersion('patch', from)]);
+    options.push(['2', 'minor', nextVersion('minor', from)]);
+    options.push(['3', 'major', nextVersion('major', from)]);
+  }
+  options.push([String(options.length + 1), 'current', from]);
+
+  console.log(`\nVersión actual: ${from}`);
+  console.log('\n  ¿Qué publicas?');
+  for (const [key, name, result] of options) {
+    const note = name === 'current' ? 'sin bump, etiqueta este commit' : '';
+    console.log(`    ${key}) ${name.padEnd(8)} → ${result} ${note}`);
+    if (name === 'current') break;
+  }
+  console.log('    (o escribe una versión, p. ej. 0.3.0)\n');
+
+  const readline = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  // Si se cierra la entrada (Ctrl+D) mientras esperamos, `question` se queda
+  // sin resolver y Node avisa de un `await` colgado; lo tratamos como error.
+  try {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const answer = await Promise.race([
+        readline.question('  Elige: '),
+        new Promise((resolve) => readline.once('close', () => resolve(null))),
+      ]);
+
+      if (answer === null) {
+        fail(`Entrada cerrada. Indica la versión como argumento.${USAGE}`);
+      }
+
+      const value = answer.trim().toLowerCase();
+      const byNumber = options.find(([key]) => key === value);
+      if (byNumber) return byNumber[1];
+      if (BUMPS.includes(value)) return value;
+      if (isValidVersion(value)) return value;
+      console.log('  No te he entendido: elige un número o escribe una versión.');
+    }
+    fail(`Demasiados intentos. Indica la versión como argumento.${USAGE}`);
+  } finally {
+    readline.close();
+  }
+}
+
+// --- Versión ---------------------------------------------------------------
+
+if (positional.length > 1) fail(`Sobra un argumento: ${positional[1]}`);
+
+const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const current = pkg.version;
+
+const bump = positional[0] ?? (await promptForVersion(current));
 const version = nextVersion(bump, current);
 const tag = `v${version}`;
 const bumping = version !== current;
@@ -200,7 +260,9 @@ if (bumping) {
   run('git add package.json');
   run(`git commit -m "chore: release ${tag}"`);
 } else {
-  console.log(`  (sin commit nuevo: se etiqueta ${capture('git rev-parse --short HEAD')})`);
+  console.log(
+    `  (sin commit nuevo: se etiqueta ${capture('git rev-parse --short HEAD')})`,
+  );
 }
 run(`git tag -a ${tag} -m "${tag}"`);
 
