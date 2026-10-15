@@ -68,7 +68,10 @@ export async function runSync(mode: SyncMode = 'full'): Promise<SyncReport> {
     log.push({ at: Date.now(), level, message });
 
   add('info', i18n.t('sync.client', [client]));
-  add('info', i18n.t('sync.mode', [mode, options.dryRun ? i18n.t('sync.dryRunSuffix') : '']));
+  add(
+    'info',
+    i18n.t('sync.mode', [mode]) + (options.dryRun ? i18n.t('sync.dryRunSuffix') : ''),
+  );
   add(
     'info',
     i18n.t('sync.roots', [

@@ -124,7 +124,7 @@
   },
   "sync": {
     "client": "Cliente: $1",
-    "mode": "Modo: $1$2",
+    "mode": "Modo: $1",
     "dryRunSuffix": " (dry-run)",
     "roots": "Raíces gestionadas: $1",
     "noRoots": "(ninguna)",

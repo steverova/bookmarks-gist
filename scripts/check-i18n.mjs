@@ -43,7 +43,7 @@ check('pt_BR · plural', t('pt_BR', 'time.days', 3), 'há 3 d');
 check('en · singular', t('en', 'time.hours', 1), '1 h ago');
 
 console.log('\nSustituciones');
-check('varias', t('es', 'sync.mode', ['full', ' (dry-run)']), 'Modo: full (dry-run)');
+check('una', t('es', 'sync.mode', ['full']), 'Modo: full');
 check(
   'dos sustituciones',
   t('es', 'about.browser', ['Chrome', 'Chrome@win']),
